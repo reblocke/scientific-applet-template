@@ -65,6 +65,7 @@ def run_self_test(*, browser: str | None) -> dict[str, object]:
     source_root = Path(__file__).resolve().parents[1]
     environment = os.environ.copy()
     environment.pop("PYTHONPATH", None)
+    environment.pop("VIRTUAL_ENV", None)
     with tempfile.TemporaryDirectory(prefix="scientific-applet-template-self-test-") as temporary:
         target = Path(temporary) / "example-applet"
         _copy_template(source_root, target)

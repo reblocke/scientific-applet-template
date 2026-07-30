@@ -66,8 +66,8 @@ def test_csv_png_and_caption_exports(page: Page, app_url: str, tmp_path: Path) -
     csv_download = csv_info.value
     csv_path = tmp_path / csv_download.suggested_filename
     csv_download.save_as(csv_path)
-    assert csv_path.read_text(encoding="utf-8") == (
-        "Label,Value\r\nFirst value,2\r\nSecond value,3\r\nDemonstration total,5\r\n"
+    assert csv_path.read_bytes() == (
+        b"Label,Value\r\nFirst value,2\r\nSecond value,3\r\nDemonstration total,5\r\n"
     )
 
     for selector, suffix in [
@@ -90,7 +90,7 @@ def test_csv_png_and_caption_exports(page: Page, app_url: str, tmp_path: Path) -
 
 def test_mobile_keyboard_and_privacy_smoke(page: Page, app_url: str) -> None:
     requests: list[tuple[str, str | None]] = []
-    page.on("request", lambda request: requests.append((request.url, request.post_data)))
+    page.context.on("request", lambda request: requests.append((request.url, request.post_data)))
     page.set_viewport_size({"width": 390, "height": 844})
     _ready(page, app_url)
     initial_url = page.url

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -39,4 +40,21 @@ def test_generated_stage_is_ignored_and_not_tracked() -> None:
     gitignore = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
 
     assert "web/assets/py/" in gitignore
-    assert not any((PROJECT_ROOT / "web/assets/py").glob("**/*"))
+    assert (
+        subprocess.run(
+            ["git", "check-ignore", "web/assets/py/manifest.json"],
+            cwd=PROJECT_ROOT,
+            check=False,
+        ).returncode
+        == 0
+    )
+    assert (
+        subprocess.run(
+            ["git", "ls-files", "web/assets/py"],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+        == ""
+    )

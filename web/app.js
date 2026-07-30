@@ -21,6 +21,7 @@ const table = document.querySelector("#result-table");
 const plot = document.querySelector("#plot");
 const exportButtons = [...document.querySelectorAll("[data-export]")];
 const copyButton = document.querySelector("#copy-caption");
+const emptyState = document.querySelector(".empty-state");
 const runtime = new WorkerRuntime();
 let currentResponse = null;
 
@@ -39,6 +40,13 @@ async function startRuntime() {
     document.querySelector("#runtime-versions").textContent = ready.packages
       .map((entry) => `${entry.distribution} ${entry.version}`)
       .join(" · ");
+    const externalPackages = ready.packages.slice(1);
+    document.querySelector("#core-version").textContent =
+      externalPackages.length === 0
+        ? "Core: none configured"
+        : `Core: ${externalPackages
+            .map((entry) => `${entry.distribution} ${entry.version}`)
+            .join(" · ")}`;
     calculateButton.disabled = false;
     setStatus(status, "Ready. Calculations stay in this browser.", "ready");
   } catch {
@@ -62,12 +70,14 @@ form.addEventListener("submit", async (event) => {
   try {
     const response = await runtime.calculate(request);
     await renderResult(response, { plot, result, summary, table });
+    emptyState.hidden = true;
     currentResponse = response;
     setExportAvailability(true);
     setStatus(status, "Calculation complete.", "ready");
   } catch (error) {
     currentResponse = null;
     result.hidden = true;
+    emptyState.hidden = false;
     showErrors(errorSummary, [
       {
         controlId: null,
@@ -89,6 +99,7 @@ form.addEventListener("reset", () => {
     clearFieldErrors(form);
     showErrors(errorSummary, []);
     result.hidden = true;
+    emptyState.hidden = false;
     currentResponse = null;
     setExportAvailability(false);
     setStatus(status, "Ready. Calculations stay in this browser.", "ready");

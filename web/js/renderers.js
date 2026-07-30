@@ -32,4 +32,6 @@ export async function renderResult(response, elements) {
     },
   );
   elements.result.hidden = false;
+  await new Promise((resolve) => globalThis.requestAnimationFrame(resolve));
+  await globalThis.Plotly.Plots.resize(elements.plot);
 }

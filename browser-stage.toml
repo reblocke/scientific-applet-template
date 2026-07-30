@@ -6,7 +6,7 @@ pyodide_packages = []
 role = "app"
 distribution = "scientific-applet-template-package"
 import_name = "template_applet"
-version = "0.1.0"
+version = "0.1.1"
 source = "project"
 
 # Add zero or more pure-Python external packages with an exact installed version:

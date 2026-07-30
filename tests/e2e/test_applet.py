@@ -23,7 +23,7 @@ def test_worker_loads_and_calculates(page: Page, app_url: str) -> None:
     expect(page.locator("#result-summary")).to_contain_text("2 + 3 = 5")
     expect(page.locator("#result-table tbody tr")).to_have_count(3)
     expect(page.locator("#plot .plot-container")).to_be_visible()
-    expect(page.locator("#runtime-versions")).to_contain_text("0.1.0")
+    expect(page.locator("#runtime-versions")).to_contain_text("0.1.1")
 
 
 def test_validation_error_and_worker_recovery(page: Page, app_url: str) -> None:
@@ -110,3 +110,6 @@ def test_mobile_keyboard_and_privacy_smoke(page: Page, app_url: str) -> None:
     assert "12345.67891" not in serialized_requests
     expect(page.locator(".controls")).to_be_visible()
     expect(page.locator(".results")).to_be_visible()
+    assert page.evaluate(
+        "document.documentElement.scrollWidth <= document.documentElement.clientWidth"
+    )

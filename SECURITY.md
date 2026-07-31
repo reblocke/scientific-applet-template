@@ -1,0 +1,46 @@
+# Security Policy
+
+## Supported versions
+
+Security fixes are applied to the latest release and the current `main` branch. Older tags remain
+reproducibility records and are not silently rewritten. Repositories created from this scaffold
+are independent and must retain truthful ownership, maintenance, and security policies.
+
+## Report a vulnerability privately
+
+Use GitHub's **Report a vulnerability** control in this repository's Security tab:
+
+<https://github.com/reblocke/scientific-applet-template/security/advisories/new>
+
+Do not disclose vulnerability details in a public issue, pull request, discussion, commit, or
+workflow log. If the private-reporting control is unavailable, use the repository's **Private
+security coordination request** issue form. That public form records only that the control is
+unavailable; do not identify the vulnerability class, affected component, reproduction, or impact
+in that issue.
+
+Include privately:
+
+- the exact tag or full commit SHA;
+- the affected initializer, Python or scientific contract, browser stage, static interface,
+  workflow, or release path;
+- a minimal reproduction using synthetic values;
+- expected and observed behavior;
+- environment and browser versions when relevant;
+- any suspected exposure of credentials, user input, or release integrity.
+
+Never send protected health information, patient-level data, credentials, unpublished restricted
+data, or other sensitive material. Redact local paths and logs. A reproducer should use synthetic
+values and the smallest safe artifact needed to demonstrate the issue.
+
+## Scope distinctions
+
+- A vulnerability or privacy defect belongs in private vulnerability reporting.
+- A suspected numerical or scientific discrepancy belongs to this repository's correction process
+  when it owns the behavior, or to the named authoritative upstream repository when a released
+  package owns it.
+- A routine, nonsensitive repository bug may use the public engineering issue form.
+- Requests for clinical interpretation are out of scope. Publication in this repository does not
+  establish clinical decision support or regulatory readiness.
+
+Publishing a fixed release does not authorize moving an old tag or replacing an old release asset.
+Preserve the affected record, publish a new version, and describe the affected range.

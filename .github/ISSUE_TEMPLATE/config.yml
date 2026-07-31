@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a vulnerability privately
+    url: https://github.com/reblocke/scientific-applet-template/security/advisories/new
+    about: Do not disclose vulnerabilities, secrets, sensitive values, or health information in a public issue.
+  - name: Read the initialization guide
+    url: https://github.com/reblocke/scientific-applet-template/blob/main/docs/TEMPLATE_USAGE.md
+    about: Check the template-specific setup and verification instructions before opening an issue.

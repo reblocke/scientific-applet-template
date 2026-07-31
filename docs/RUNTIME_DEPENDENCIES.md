@@ -24,3 +24,11 @@ where applicable.
 Template repository code is MIT licensed. Pyodide, Plotly, Python packages, papers, data, figures,
 and publisher assets retain their own licenses. Do not copy an external artifact without
 confirming compatible rights and attribution.
+
+## Repository automation
+
+Every third-party GitHub Action is pinned to a reviewed full commit SHA with a human-readable
+version comment. Dependabot proposes grouped weekly updates for both `uv` dependencies and Action
+pins. An update remains a reviewed source and supply-chain change: inspect upstream release notes,
+confirm the referenced commit belongs to the stated release, and rerun the full suite before
+merging. Dependency automation does not authorize a new scientific core or automatic merging.

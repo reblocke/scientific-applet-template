@@ -36,9 +36,20 @@ captions, and exports communicate the same validated result.
 For each release, record:
 
 - exact commit and tag;
+- exact equality between the version tag and authoritative project version;
+- GitHub verification of the signed annotated tag;
+- containment of the verified tag target in protected `main` history before repository code;
 - locked dependency and core versions;
 - stage manifest and checksums;
 - unit/property/contract results;
 - Chromium and WebKit results;
+- locally built and downloaded draft-asset comparison;
+- nonempty release notes extracted only from the tagged version's changelog section;
+- published release immutability;
 - hosted Pages smoke;
 - known limitations and skipped checks.
+
+Repository-policy tests also verify full-SHA Action pins with version comments, least-privilege
+workflow permissions, draft-first publication order, immutable-release enforcement, Dependabot
+coverage, private-reporting guidance, and preservation of the disposable-app self-test. These
+checks validate engineering policy, not a downstream scientific method.

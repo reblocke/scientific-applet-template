@@ -44,6 +44,10 @@ rerun the full verification suite.
 Detailed initialization and replacement guidance is in
 [docs/TEMPLATE_USAGE.md](docs/TEMPLATE_USAGE.md).
 
+Public engineering contributions use the scoped issue and pull-request templates in `.github/`.
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md); never put protected
+health information, credentials, restricted data, or sensitive values in a public report.
+
 ## Architecture
 
 ```text
@@ -128,8 +132,16 @@ make clean
 ```
 
 `make verify` expects Chromium and WebKit to have been installed. CI runs the same targets. Pages
-deploys the staged `web/` directory, and tagged releases rerun all checks before publishing a
-deterministic source archive, browser-stage manifest, and checksums.
+deploys the staged `web/` directory. A signed annotated version tag reruns all checks, builds the
+deterministic source archive, browser-stage manifest, and checksums under read-only permissions,
+then transfers the complete bundle to a narrowly write-enabled job. That job requires repository
+release immutability, creates a draft stable release, downloads and compares every asset and the
+release body, and publishes only the verified draft. Credentialed release commands use an exact
+checksummed GitHub CLI, and the immutable-release settings check uses the
+`RELEASE_SETTINGS_READ_TOKEN` Actions secret. Release notes are extracted only from the changelog
+section matching the tagged project version; the full changelog is never used as a release body.
+Before repository code runs, the workflow binds the GitHub-verified tag object to the event commit
+and requires that commit to be contained in protected `main` history.
 
 ## Author checklist
 
@@ -143,6 +155,8 @@ Before calling an initialized app complete:
 5. Verify privacy, accessibility, strict JSON, Chromium, WebKit, cold initialization, and Pages.
 6. Update citation, license applicability, hosted URL, maintenance status, decision records, and
    release notes.
+7. Review the inherited security policy, issue forms, pull-request checklist, Dependabot schedule,
+   and release workflow for the downstream repository's ownership and scientific scope.
 
 ## License and citation
 

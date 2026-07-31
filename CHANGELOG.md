@@ -5,7 +5,7 @@ All notable changes use a release-oriented record here. This repository follows
 
 ## [Unreleased]
 
-## [0.1.2] - 2026-07-30
+## [0.1.2] - 2026-07-31
 
 - Add a least-privilege, signed-tag, draft-first release pipeline that verifies all downloaded
   assets and release notes before one-time stable publication and requires immutable releases.

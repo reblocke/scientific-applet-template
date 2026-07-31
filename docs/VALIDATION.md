@@ -38,6 +38,7 @@ For each release, record:
 - exact commit and tag;
 - exact equality between the version tag and authoritative project version;
 - GitHub verification of the signed annotated tag;
+- containment of the verified tag target in protected `main` history before repository code;
 - locked dependency and core versions;
 - stage manifest and checksums;
 - unit/property/contract results;

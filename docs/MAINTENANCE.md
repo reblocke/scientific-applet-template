@@ -31,21 +31,25 @@ with its reviewed version in a comment. For any external scientific core:
 
 Use a reviewed pull request. After the exact merge commit is verified, create a signed, annotated
 semantic-version tag. The release workflow verifies the signature, reruns the full suite under
-read-only contents permission, and builds the deterministic source archive, browser-stage manifest,
-and SHA-256 checksums before a release exists. A separate job with narrowly scoped contents-write
-permission requires repository release immutability, creates a draft prerelease with every asset,
-downloads and compares the draft assets, then publishes only the verified draft.
+read-only contents permission, requires the verified tag target to be contained in protected
+`main` history, and builds the deterministic source archive, browser-stage manifest, and SHA-256
+checksums before a release exists. Project-version parsing uses isolated Python only after tag
+verification. A separate job with narrowly scoped contents-write permission uses an exact
+checksummed GitHub CLI, requires repository release immutability through
+the `RELEASE_SETTINGS_READ_TOKEN` Actions secret, creates a draft stable release with every asset,
+downloads and compares the draft assets and release body, then publishes only the verified draft.
 The tag must equal `v` plus the authoritative project version, and the public release body contains
 only that version's nonempty changelog section.
 
 If the workflow fails after draft creation, retain the draft for inspection. Repair the workflow
 and create a new tag only after the failure is understood; never move a published tag or replace a
-published asset. Promote a prerelease only after hosted Pages and portfolio-level validation are
-complete, and confirm that the administrative promotion does not change its tag or assets.
+published asset. The draft is the candidate; publish once into the intended stable lifecycle state
+after hosted Pages and portfolio-level validation are complete.
 
 Repository settings must retain read-only default workflow permissions, protect `main` and `v*`
 tags, enable private vulnerability reporting and Dependabot security updates, and enable immutable
-releases before the next tag is created.
+releases before the next tag is created. Store a repository-administration read token as the
+`RELEASE_SETTINGS_READ_TOKEN` Actions secret so the workflow can fail closed before publication.
 
 ## Deprecation
 

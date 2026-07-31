@@ -32,9 +32,13 @@ A release requires a GitHub-verified signed annotated tag and enabled repository
 immutability. The tag must equal `v` plus the authoritative project version. The workflow builds
 and checksums all assets before release creation, extracts a nonempty release body from only that
 version's changelog section, transfers the complete bundle to a separate publishing job, creates a
-draft prerelease, downloads and compares every draft asset, and publishes only after exact
-verification. A failed run leaves an inspectable draft rather than an incompletely published
-release. Published tags and assets are never rewritten.
+draft stable release, downloads and compares every draft asset and its release body, and publishes
+only after exact verification. Credentialed release commands use an exact checksummed GitHub CLI;
+the pre-publication immutability query uses a dedicated settings-read Actions secret. A failed run
+leaves an inspectable draft rather than an incompletely published release. Published tags and
+assets are never rewritten or promoted between lifecycle states. The signed tag is bound to the
+event commit and protected `main` history before isolated project-version parsing or other
+repository code execution.
 
 Private vulnerability reporting is the disclosure path. Public issue forms explicitly exclude
 credentials, restricted data, sensitive user values, and protected health information.

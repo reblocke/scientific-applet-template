@@ -135,9 +135,13 @@ make clean
 deploys the staged `web/` directory. A signed annotated version tag reruns all checks, builds the
 deterministic source archive, browser-stage manifest, and checksums under read-only permissions,
 then transfers the complete bundle to a narrowly write-enabled job. That job requires repository
-release immutability, creates a draft prerelease, downloads and compares every asset, and publishes
-only the verified draft. Release notes are extracted only from the changelog section matching the
-tagged project version; the full changelog is never used as a release body.
+release immutability, creates a draft stable release, downloads and compares every asset and the
+release body, and publishes only the verified draft. Credentialed release commands use an exact
+checksummed GitHub CLI, and the immutable-release settings check uses the
+`RELEASE_SETTINGS_READ_TOKEN` Actions secret. Release notes are extracted only from the changelog
+section matching the tagged project version; the full changelog is never used as a release body.
+Before repository code runs, the workflow binds the GitHub-verified tag object to the event commit
+and requires that commit to be contained in protected `main` history.
 
 ## Author checklist
 

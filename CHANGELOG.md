@@ -6,7 +6,12 @@ All notable changes use a release-oriented record here. This repository follows
 ## [Unreleased]
 
 - Add a least-privilege, signed-tag, draft-first release pipeline that verifies all downloaded
-  assets before publishing and requires immutable releases.
+  assets and release notes before one-time stable publication and requires immutable releases.
+- Install an exact checksummed GitHub CLI before credentialed release commands and use a dedicated
+  settings-read secret for the pre-publication immutability gate.
+- Disable shared dependency caching in the release-artifact build job.
+- Require the verified release-tag target to be contained in protected `main` history and defer
+  isolated project-version parsing until after signature verification.
 - Pin every third-party GitHub Action to a full commit SHA, add grouped weekly Dependabot updates
   for `uv` and GitHub Actions, and add scoped security, contribution, issue, and pull-request
   guidance.

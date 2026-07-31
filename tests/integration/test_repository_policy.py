@@ -6,6 +6,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_ROOT = PROJECT_ROOT / ".github" / "workflows"
+GH_CLI_VERSION = "2.93.0"
+GH_CLI_LINUX_AMD64_SHA256 = "02d1290eba130e0b896f3709ffff22e1c75a51475ddb70476a85abc6b5807af0"
 
 
 def test_makefile_exposes_required_commands() -> None:
@@ -82,40 +84,107 @@ def test_workflow_permissions_are_explicit_and_least_privilege() -> None:
     assert "permissions:\n  contents: read" in ci
     if template_self_test.exists():
         assert "permissions:\n  contents: read" in template_self_test.read_text(encoding="utf-8")
-    assert "permissions:\n  contents: read\n  pages: write\n  id-token: write" in pages
+    assert "permissions: {}" in pages
+    assert "build:\n    permissions:\n      contents: read" in pages
+    assert (
+        "deploy:\n    needs: build\n    permissions:\n      pages: write\n      id-token: write"
+        in pages
+    )
+    build_block, deploy_block = pages.split("\n  deploy:", maxsplit=1)
+    assert "id-token: write" not in build_block
+    assert "pages: write" not in build_block
+    assert "actions/configure-pages@" not in build_block
+    assert "contents: read" not in deploy_block
+    assert "actions/configure-pages@" in deploy_block
     assert "permissions: {}" in release
     assert "verify-and-build:\n    permissions:\n      contents: read" in release
+    verify_build_block, publish_block = release.split("\n  publish:", maxsplit=1)
+    assert "enable-cache: true" not in verify_build_block
+    assert "enable-cache: false" in verify_build_block
     assert release.count("contents: write") == 1
     assert (
         "publish:\n    needs: verify-and-build\n    permissions:\n      contents: write" in release
     )
+    workflow_text = "\n".join(
+        path.read_text(encoding="utf-8") for path in sorted(WORKFLOW_ROOT.glob("*.yml"))
+    )
+    checkout_count = workflow_text.count("uses: actions/checkout@")
+    assert checkout_count > 0
+    assert workflow_text.count("persist-credentials: false") == checkout_count
 
 
 def test_release_is_signed_tag_draft_first_and_immutable_fail_closed() -> None:
     release = (WORKFLOW_ROOT / "release.yml").read_text(encoding="utf-8")
 
-    assert 'tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]' in release
+    version_parse = (
+        "python -I -c 'import tomllib; "
+        'print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])\''
+    )
+    assert version_parse in release
     assert 'test "$GITHUB_REF_NAME" = "v${project_version}"' in release
     assert 'git cat-file -t "$GITHUB_REF_NAME"' in release
+    assert "/git/ref/tags/${GITHUB_REF_NAME}" in release
+    assert 'git rev-parse "refs/tags/$GITHUB_REF_NAME"' in release
+    assert "--jq '.tag'" in release
     assert ".verification.verified" in release
-    assert 'gh api "repos/${GITHUB_REPOSITORY}/immutable-releases"' in release
+    assert ".verification.reason" in release
+    assert ')" = "valid"' in release
+    assert "--jq '.object.sha'" in release
+    assert "--jq '.object.type'" in release
+    assert ')" = "commit"' in release
+    assert '"https://github.com/${GITHUB_REPOSITORY}.git"' in release
+    assert "+refs/heads/main:refs/remotes/origin/main" in release
+    assert 'git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main' in release
+    assert release.index(".verification.verified") < release.index("git fetch")
+    assert release.index("git merge-base --is-ancestor") < release.index(version_parse)
+    assert release.index(".verification.verified") < release.index(version_parse)
+    assert release.index(".verification.verified") < release.index("uv sync --locked")
+    assert '"repos/${GITHUB_REPOSITORY}/immutable-releases"' in release
     assert ')" = "true"' in release
+    assert "secrets.RELEASE_SETTINGS_READ_TOKEN" in release
     assert "sha256sum --check SHA256SUMS" in release
     assert "actions/upload-artifact@" in release
     assert "actions/download-artifact@" in release
     assert "--draft" in release
     assert "--verify-tag" in release
+    assert "--prerelease" not in release
     assert 'awk -v version="$version"' in release
     assert "--notes-file dist/release-notes.md" in release
     assert "--notes-file CHANGELOG.md" not in release
+    assert "jq --exit-status --join-output '.body'" in release
+    assert "cmp --silent dist/release-notes.md" in release
+    assert "GH_REPO: ${{ github.repository }}" in release
     assert "gh release download" in release
     assert "diff --recursive --brief dist/assets remote-dist" in release
     assert "--draft=false" in release
     assert "--json isImmutable" in release
+    assert "gh release verify" in release
+    assert "gh release verify-asset" in release
     assert (
         release.index("gh release create")
         < release.index("gh release download")
         < release.index("--draft=false")
+    )
+
+
+def test_release_installs_checksummed_github_cli_before_credentialed_commands() -> None:
+    release = (WORKFLOW_ROOT / "release.yml").read_text(encoding="utf-8")
+
+    assert f'GH_CLI_VERSION: "{GH_CLI_VERSION}"' in release
+    assert f'GH_CLI_LINUX_AMD64_SHA256: "{GH_CLI_LINUX_AMD64_SHA256}"' in release
+    assert release.count("Install checksummed GitHub CLI") == 2
+    assert release.count("sha256sum --check --strict -") == 2
+    assert release.count("Confirm the checksummed GitHub CLI is selected") == 2
+    assert release.index("Install checksummed GitHub CLI") < release.index(
+        "Require GitHub verification of the signed tag"
+    )
+    publish_start = release.index("\n  publish:")
+    publish = release[publish_start:]
+    assert publish.index("Install checksummed GitHub CLI") < publish.index(
+        "Require repository release immutability"
+    )
+    assert publish.index("Confirm the checksummed GitHub CLI is selected") < publish.index(
+        "gh release create"
     )
 
 
@@ -157,6 +226,7 @@ def test_public_coordination_files_preserve_scope_and_private_reporting() -> Non
     assert "does not establish clinical decision support" in normalized_security
     assert "scientific formula" in contributing.lower()
     assert "private" in contributing.lower()
+    assert "release_settings_read_token" in contributing.lower()
     assert "blank_issues_enabled: false" in issue_config
     assert "/security/advisories/new" in issue_config
     assert "protected health information" in engineering_issue.lower()

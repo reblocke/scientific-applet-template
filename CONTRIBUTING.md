@@ -48,13 +48,20 @@ A release change requires a reviewed pull request and a signed, annotated versio
 the exact reviewed merge commit. The tag must equal `v` plus the authoritative project version,
 and that version needs a nonempty changelog section. The tag workflow:
 
-1. verifies the tag and complete test suite with read-only contents permission;
-2. builds and checksums all assets before creating a release;
-3. transfers the complete bundle to a narrowly write-enabled publishing job;
-4. requires repository release immutability;
-5. creates a draft prerelease using only the current version's changelog section;
-6. downloads and compares every draft asset; and
-7. publishes only the verified draft.
+1. cryptographically verifies the tag before executing repository code;
+2. requires the verified tag target to be contained in protected `main` history and match the
+   project version;
+3. verifies the complete suite with read-only contents permission;
+4. builds and checksums all assets before creating a release;
+5. transfers the complete bundle to a narrowly write-enabled publishing job;
+6. requires repository release immutability;
+7. creates a draft stable release using only the current version's changelog section;
+8. downloads and compares every draft asset and the release body; and
+9. publishes only the verified draft once as stable.
+
+Before creating the tag, enable immutable releases and configure a repository-administration read
+token as the `RELEASE_SETTINGS_READ_TOKEN` Actions secret. The publishing job uses that secret only
+for the fail-closed settings query; release creation uses the job-scoped GitHub token.
 
 If a release job fails after draft creation, leave the release as a draft for inspection. Do not
 replace assets or move a tag after publication.

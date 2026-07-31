@@ -62,7 +62,9 @@ URL, core version, repository description, and related-tool links. Review the in
 `SECURITY.md`, contribution guidance, issue forms, pull-request checklist, Dependabot schedule,
 and release workflow so they name truthful downstream ownership and scope. Enable private
 vulnerability reporting, branch/tag protection, Dependabot security updates, and immutable
-releases in the new repository before its first tag.
+releases in the new repository before its first tag. Store a repository-administration read token
+as the `RELEASE_SETTINGS_READ_TOKEN` Actions secret for the release workflow's fail-closed
+immutability check.
 
 ## 6. Verify and publish
 

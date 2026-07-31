@@ -62,9 +62,8 @@ URL, core version, repository description, and related-tool links. Review the in
 `SECURITY.md`, contribution guidance, issue forms, pull-request checklist, Dependabot schedule,
 and release workflow so they name truthful downstream ownership and scope. Enable private
 vulnerability reporting, branch/tag protection, Dependabot security updates, and immutable
-releases in the new repository before its first tag. Store a repository-administration read token
-as the `RELEASE_SETTINGS_READ_TOKEN` Actions secret for the release workflow's fail-closed
-immutability check.
+releases in the new repository before its first tag. Release automation uses only job-scoped
+GitHub permissions and does not require a repository-administration credential.
 
 ## 6. Verify and publish
 
@@ -77,6 +76,6 @@ git status --short
 ```
 
 Open a reviewed pull request. Confirm CI, template self-test (template repository only), Pages,
-and the deployed app. Tag only the exact reviewed merge commit. Use a signed annotated tag; the
-release workflow intentionally fails if GitHub cannot verify the signature or repository release
-immutability is disabled.
+and the deployed app. Tag only the exact reviewed merge commit with an annotated tag. The release
+workflow binds that exact remote tag object to the protected-`main` commit, verifies every draft
+asset, publishes once, and fails unless the published release reports immutable.

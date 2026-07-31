@@ -4,41 +4,136 @@ on:
   push:
     tags: ["v*"]
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
-  verify-and-release:
+  verify-and-build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version-file: .python-version
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           enable-cache: true
+      - name: Confirm an annotated tag points to the checked-out commit
+        shell: bash
+        run: |
+          project_version="$(
+            python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])'
+          )"
+          test "$GITHUB_REF_NAME" = "v${project_version}"
+          test "$(git cat-file -t "$GITHUB_REF_NAME")" = "tag"
+          test "$(git rev-parse "$GITHUB_REF_NAME^{commit}")" = "$GITHUB_SHA"
+      - name: Require GitHub verification of the signed tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          tag_object="$(
+            gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${GITHUB_REF_NAME}" \
+              --jq '.object.sha'
+          )"
+          test "$(
+            gh api "repos/${GITHUB_REPOSITORY}/git/tags/${tag_object}" \
+              --jq '.verification.verified'
+          )" = "true"
       - run: uv sync --locked
       - run: uv run playwright install --with-deps chromium webkit
       - run: make verify
       - name: Build deterministic source and stage artifacts
         shell: bash
         run: |
-          mkdir -p dist
+          version="${GITHUB_REF_NAME#v}"
+          bundle=dist
+          assets="$bundle/assets"
+          mkdir -p "$assets"
           git archive --format=tar --prefix="scientific-applet-template-${GITHUB_REF_NAME}/" HEAD |
-            gzip -n > "dist/scientific-applet-template-${GITHUB_REF_NAME}.tar.gz"
+            gzip -n > "$assets/scientific-applet-template-${GITHUB_REF_NAME}.tar.gz"
           cp web/assets/py/manifest.json \
-            "dist/browser-stage-manifest-${GITHUB_REF_NAME}.json"
-          cd dist
-          sha256sum *.json *.tar.gz > SHA256SUMS
-      - name: Publish prerelease
+            "$assets/browser-stage-manifest-${GITHUB_REF_NAME}.json"
+          (
+            cd "$assets"
+            sha256sum *.json *.tar.gz > SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+          awk -v version="$version" '
+            index($0, "## [" version "] - ") == 1 { capture = 1; next }
+            capture && /^## \[/ { exit }
+            capture && /^\[[^]]+\]:/ { exit }
+            capture { print }
+          ' CHANGELOG.md > "$bundle/release-notes.md"
+          test -s "$bundle/release-notes.md"
+      - name: Transfer the complete release bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-bundle-${{ github.ref_name }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: verify-and-build
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve the verified release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-bundle-${{ github.ref_name }}
+          path: dist
+      - name: Recheck the transferred release bundle
+        shell: bash
+        run: |
+          test "$(find dist/assets -maxdepth 1 -type f | wc -l)" -eq 3
+          test -s dist/release-notes.md
+          cd dist/assets
+          sha256sum --check SHA256SUMS
+      - name: Require repository release immutability
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* \
+          test "$(
+            gh api "repos/${GITHUB_REPOSITORY}/immutable-releases" --jq .enabled
+          )" = "true"
+      - name: Create a draft prerelease with every asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/assets/* \
+            --draft \
             --prerelease \
             --verify-tag \
             --title "$GITHUB_REF_NAME" \
-            --notes-file CHANGELOG.md
+            --notes-file dist/release-notes.md
+      - name: Verify the draft and downloaded assets before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          test "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft)" = "true"
+          test "$(gh release view "$GITHUB_REF_NAME" --json isPrerelease --jq .isPrerelease)" = "true"
+          expected_assets="$(find dist/assets -maxdepth 1 -type f -exec basename {} \; | sort)"
+          actual_assets="$(
+            gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name' | sort
+          )"
+          test "$expected_assets" = "$actual_assets"
+          mkdir remote-dist
+          gh release download "$GITHUB_REF_NAME" --dir remote-dist
+          diff --recursive --brief dist/assets remote-dist
+          cd remote-dist
+          sha256sum --check SHA256SUMS
+      - name: Publish only the verified draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit "$GITHUB_REF_NAME" --draft=false --prerelease
+          test "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft)" = "false"
+          test "$(gh release view "$GITHUB_REF_NAME" --json isImmutable --jq .isImmutable)" = "true"
+          test "$(gh release view "$GITHUB_REF_NAME" --json isPrerelease --jq .isPrerelease)" = "true"

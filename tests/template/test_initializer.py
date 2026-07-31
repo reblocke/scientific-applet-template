@@ -46,6 +46,17 @@ def _example_identity() -> dict[str, str]:
     )
 
 
+def test_template_repository_requires_disposable_app_self_test() -> None:
+    workflow = (PROJECT_ROOT / ".github" / "workflows" / "template-self-test.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert (PROJECT_ROOT / "scripts" / "self_test_template.py").is_file()
+    assert "initialize-disposable-app:" in workflow
+    assert "permissions:\n  contents: read" in workflow
+    assert "make template-self-test" in workflow
+
+
 def test_initializer_renames_exhausts_identity_and_preserves_git(tmp_path: Path) -> None:
     target = _copy_repository(tmp_path)
     old_identity = json.loads((target / ".template-identity.json").read_text(encoding="utf-8"))[
@@ -64,6 +75,13 @@ def test_initializer_renames_exhausts_identity_and_preserves_git(tmp_path: Path)
     assert not (target / "docs/TEMPLATE_PROVENANCE.md").exists()
     assert not (target / ".github/workflows/template-self-test.yml").exists()
     assert not (target / "scripts/self_test_template.py").exists()
+    assert (target / "SECURITY.md").is_file()
+    assert (target / "CONTRIBUTING.md").is_file()
+    assert (target / ".github/dependabot.yml").is_file()
+    assert (target / ".github/PULL_REQUEST_TEMPLATE.md").is_file()
+    assert (target / ".github/ISSUE_TEMPLATE/engineering-bug.yml").is_file()
+    assert (target / ".github/ISSUE_TEMPLATE/accessibility-report.yml").is_file()
+    assert (target / ".github/ISSUE_TEMPLATE/security-contact.yml").is_file()
 
     readable = "\n".join(
         path.read_text(encoding="utf-8")

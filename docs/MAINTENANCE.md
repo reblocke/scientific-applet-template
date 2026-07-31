@@ -17,7 +17,9 @@ AUTHOR ACTION REQUIRED: confirm downstream ownership, review responsibilities, a
 ## Dependency updates
 
 Review Pyodide, Plotly, Python, uv, Ruff, pytest, Hypothesis, Playwright, and GitHub Actions
-updates deliberately. For any external scientific core:
+updates deliberately. Dependabot groups weekly `uv` and GitHub Actions updates for review; it
+does not authorize automatic merging. Keep each third-party Action pinned to a full commit SHA
+with its reviewed version in a comment. For any external scientific core:
 
 1. review its release notes and scientific changes;
 2. update the exact package version and artifact checksum;
@@ -27,10 +29,23 @@ updates deliberately. For any external scientific core:
 
 ## Release
 
-Use a reviewed pull request. After the exact merge commit is verified, create an annotated
-semantic-version tag. The release workflow reruns the full suite and publishes a prerelease with
-a deterministic source archive, browser-stage manifest, and SHA-256 checksums. Promote a release
-only after hosted Pages and portfolio-level validation are complete.
+Use a reviewed pull request. After the exact merge commit is verified, create a signed, annotated
+semantic-version tag. The release workflow verifies the signature, reruns the full suite under
+read-only contents permission, and builds the deterministic source archive, browser-stage manifest,
+and SHA-256 checksums before a release exists. A separate job with narrowly scoped contents-write
+permission requires repository release immutability, creates a draft prerelease with every asset,
+downloads and compares the draft assets, then publishes only the verified draft.
+The tag must equal `v` plus the authoritative project version, and the public release body contains
+only that version's nonempty changelog section.
+
+If the workflow fails after draft creation, retain the draft for inspection. Repair the workflow
+and create a new tag only after the failure is understood; never move a published tag or replace a
+published asset. Promote a prerelease only after hosted Pages and portfolio-level validation are
+complete, and confirm that the administrative promotion does not change its tag or assets.
+
+Repository settings must retain read-only default workflow permissions, protect `main` and `v*`
+tags, enable private vulnerability reporting and Dependabot security updates, and enable immutable
+releases before the next tag is created.
 
 ## Deprecation
 

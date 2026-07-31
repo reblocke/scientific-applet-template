@@ -1,6 +1,6 @@
 [project]
 name = "scientific-applet-template-package"
-version = "0.1.1"
+version = "0.1.2"
 description = "Reusable client-side Python scaffold for a focused scientific applet"
 readme = "README.md"
 requires-python = ">=3.12"

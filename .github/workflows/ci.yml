@@ -8,8 +8,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,6 +37,7 @@ jobs:
           test -z "$(git status --porcelain --untracked-files=all)"
 
   e2e-chromium:
+    name: e2e-chromium
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -55,6 +61,7 @@ jobs:
           if-no-files-found: ignore
 
   e2e-webkit-smoke:
+    name: e2e-webkit-smoke
     needs: test
     runs-on: ubuntu-latest
     steps:

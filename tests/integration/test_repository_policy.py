@@ -85,10 +85,11 @@ def test_workflow_permissions_are_explicit_and_least_privilege() -> None:
     if template_self_test.exists():
         assert "permissions:\n  contents: read" in template_self_test.read_text(encoding="utf-8")
     assert "permissions: {}" in pages
-    assert "build:\n    permissions:\n      contents: read" in pages
+    assert "build:\n    name: Build Pages artifact\n    permissions:\n      contents: read" in pages
     assert (
-        "deploy:\n    needs: build\n    permissions:\n      pages: write\n      id-token: write"
-        in pages
+        "deploy:\n    name: Deploy Pages\n    needs: build\n    permissions:\n"
+        "      pages: write # Publish the verified Pages artifact.\n"
+        "      id-token: write # Authenticate the Pages deployment." in pages
     )
     build_block, deploy_block = pages.split("\n  deploy:", maxsplit=1)
     assert "id-token: write" not in build_block
@@ -97,13 +98,18 @@ def test_workflow_permissions_are_explicit_and_least_privilege() -> None:
     assert "contents: read" not in deploy_block
     assert "actions/configure-pages@" in deploy_block
     assert "permissions: {}" in release
-    assert "verify-and-build:\n    permissions:\n      contents: read" in release
+    assert (
+        "verify-and-build:\n    name: Verify tag and build release bundle\n"
+        "    permissions:\n      contents: read" in release
+    )
     verify_build_block, publish_block = release.split("\n  publish:", maxsplit=1)
     assert "enable-cache: true" not in verify_build_block
     assert "enable-cache: false" in verify_build_block
     assert release.count("contents: write") == 1
     assert (
-        "publish:\n    needs: verify-and-build\n    permissions:\n      contents: write" in release
+        "publish:\n    name: Verify and publish immutable release\n"
+        "    needs: verify-and-build\n    permissions:\n"
+        "      contents: write # Create and publish the verified GitHub release." in release
     )
     workflow_text = "\n".join(
         path.read_text(encoding="utf-8") for path in sorted(WORKFLOW_ROOT.glob("*.yml"))
@@ -194,6 +200,7 @@ def test_dependabot_covers_locked_python_and_actions_without_auto_merge() -> Non
     assert 'package-ecosystem: "uv"' in dependabot
     assert 'package-ecosystem: "github-actions"' in dependabot
     assert dependabot.count('interval: "weekly"') == 2
+    assert dependabot.count("default-days: 7") == 2
     assert "python-dependencies:" in dependabot
     assert "github-actions:" in dependabot
     assert "automerge" not in dependabot.lower()

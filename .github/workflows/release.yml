@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   verify-and-build:
+    name: Verify tag and build release bundle
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -152,9 +153,10 @@ jobs:
           retention-days: 1
 
   publish:
+    name: Verify and publish immutable release
     needs: verify-and-build
     permissions:
-      contents: write
+      contents: write # Create and publish the verified GitHub release.
     runs-on: ubuntu-latest
     env:
       GH_REPO: ${{ github.repository }}

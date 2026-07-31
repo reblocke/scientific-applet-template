@@ -12,6 +12,8 @@ updates:
       python-dependencies:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
 
   - package-ecosystem: "github-actions"
@@ -25,4 +27,6 @@ updates:
       github-actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5

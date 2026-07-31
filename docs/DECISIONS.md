@@ -43,6 +43,21 @@ repository code execution.
 Private vulnerability reporting is the disclosure path. Public issue forms explicitly exclude
 credentials, restricted data, sensitive user values, and protected health information.
 
+## 2026-07-31 — Supersede external release credentials with intrinsic release verification
+
+The 2026-07-30 decision required GitHub signature verification for the annotated tag and a
+separate repository-administration token for a pre-publication immutable-settings query. Those two
+requirements are superseded. The workflow instead binds the local and remote annotated-tag objects
+and target to the event commit with `github.token`, requires protected-`main` containment and exact
+version agreement, and uses no external release credential.
+
+The deterministic build, complete bundle transfer, draft-first lifecycle, release-body comparison,
+hosted asset byte comparison, and one-time publication remain unchanged. Immediately after
+publication, the workflow requires `isImmutable` to be true and verifies the release and every
+hosted asset. This proves tag identity and release immutability without proving tag-author identity
+cryptographically or preflighting the administrative setting. A failed post-publication proof is
+repaired with a new version and annotated tag; the published record is never rewritten.
+
 ## New decision record
 
 AUTHOR ACTION REQUIRED: append dated decisions that change scientific meaning, runtime,

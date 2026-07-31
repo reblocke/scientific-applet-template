@@ -7,19 +7,20 @@ All notable changes use a release-oriented record here. This repository follows
 
 ## [0.1.2] - 2026-07-31
 
-- Add a least-privilege, signed-tag, draft-first release pipeline that verifies all downloaded
-  assets and release notes before one-time stable publication and requires immutable releases.
-- Install an exact checksummed GitHub CLI before credentialed release commands and use a dedicated
-  settings-read secret for the pre-publication immutability gate.
+- Add a least-privilege, annotated-tag, draft-first release pipeline that verifies all downloaded
+  assets and release notes before one-time stable publication and proves the published release is
+  immutable.
+- Install an exact checksummed GitHub CLI before credentialed release commands and use only the
+  job-scoped GitHub token for tag and release-object operations.
 - Disable shared dependency caching in the release-artifact build job.
-- Require the verified release-tag target to be contained in protected `main` history and defer
-  isolated project-version parsing until after signature verification.
+- Require the exact remote-bound release-tag target to be contained in protected `main` history
+  and defer isolated project-version parsing until after tag-object and target verification.
 - Pin every third-party GitHub Action to a full commit SHA, add grouped weekly Dependabot updates
   for `uv` and GitHub Actions, and add scoped security, contribution, issue, and pull-request
   guidance.
 - Add repository-policy regressions for action provenance, token permissions, draft publication,
   dependency monitoring, private-reporting guidance, and the disposable-app self-test.
-- Require the signed tag to equal the authoritative project version and limit release notes to
+- Require the annotated tag to equal the authoritative project version and limit release notes to
   that version's nonempty changelog section.
 - Upgrade the development-only pytest requirement and lock from 8.4.2 to 9.0.3; no runtime or
   scientific Python package dependency was added, and the existing Pyodide and Plotly browser

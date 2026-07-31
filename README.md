@@ -132,16 +132,16 @@ make clean
 ```
 
 `make verify` expects Chromium and WebKit to have been installed. CI runs the same targets. Pages
-deploys the staged `web/` directory. A signed annotated version tag reruns all checks, builds the
+deploys the staged `web/` directory. An annotated version tag reruns all checks, builds the
 deterministic source archive, browser-stage manifest, and checksums under read-only permissions,
-then transfers the complete bundle to a narrowly write-enabled job. That job requires repository
-release immutability, creates a draft stable release, downloads and compares every asset and the
-release body, and publishes only the verified draft. Credentialed release commands use an exact
-checksummed GitHub CLI, and the immutable-release settings check uses the
-`RELEASE_SETTINGS_READ_TOKEN` Actions secret. Release notes are extracted only from the changelog
-section matching the tagged project version; the full changelog is never used as a release body.
-Before repository code runs, the workflow binds the GitHub-verified tag object to the event commit
-and requires that commit to be contained in protected `main` history.
+then transfers the complete bundle to a narrowly write-enabled job. That job creates a draft stable
+release, downloads and compares every asset and the release body, publishes only the verified
+draft, and then requires proof that the published release is immutable. Credentialed release
+commands use an exact checksummed GitHub CLI and only the job-scoped GitHub token. Release notes are
+extracted only from the changelog section matching the tagged project version; the full changelog
+is never used as a release body. Before repository code runs, the workflow binds the exact remote
+annotated-tag object and target to the event commit and requires that commit to be contained in
+protected `main` history.
 
 ## Author checklist
 

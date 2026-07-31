@@ -37,8 +37,9 @@ For each release, record:
 
 - exact commit and tag;
 - exact equality between the version tag and authoritative project version;
-- GitHub verification of the signed annotated tag;
-- containment of the verified tag target in protected `main` history before repository code;
+- exact equality between the local and remote annotated-tag object SHAs, plus exact equality
+  between the peeled tag target and event commit;
+- containment of the annotated tag target in protected `main` history before repository code;
 - locked dependency and core versions;
 - stage manifest and checksums;
 - unit/property/contract results;
@@ -50,6 +51,7 @@ For each release, record:
 - known limitations and skipped checks.
 
 Repository-policy tests also verify full-SHA Action pins with version comments, least-privilege
-workflow permissions, draft-first publication order, immutable-release enforcement, Dependabot
-coverage, private-reporting guidance, and preservation of the disposable-app self-test. These
-checks validate engineering policy, not a downstream scientific method.
+workflow permissions, external-credential absence, draft-first publication order,
+post-publication immutable-release proof, Dependabot coverage, private-reporting guidance, and
+preservation of the disposable-app self-test. These checks validate engineering policy, not a
+downstream scientific method.

@@ -121,7 +121,7 @@ def test_workflow_permissions_are_explicit_and_least_privilege() -> None:
     assert workflow_text.count("persist-credentials: false") == checkout_count
 
 
-def test_release_is_signed_tag_draft_first_and_immutable_fail_closed() -> None:
+def test_release_is_annotated_tag_draft_first_and_immutable_after_publication() -> None:
     release = (WORKFLOW_ROOT / "release.yml").read_text(encoding="utf-8")
 
     version_parse = (
@@ -134,22 +134,27 @@ def test_release_is_signed_tag_draft_first_and_immutable_fail_closed() -> None:
     assert "/git/ref/tags/${GITHUB_REF_NAME}" in release
     assert 'git rev-parse "refs/tags/$GITHUB_REF_NAME"' in release
     assert "--jq '.tag'" in release
-    assert ".verification.verified" in release
-    assert ".verification.reason" in release
-    assert ')" = "valid"' in release
+    assert "GH_TOKEN: ${{ github.token }}" in release
+    assert ".verification.verified" not in release
+    assert ".verification.reason" not in release
     assert "--jq '.object.sha'" in release
     assert "--jq '.object.type'" in release
     assert ')" = "commit"' in release
     assert '"https://github.com/${GITHUB_REPOSITORY}.git"' in release
     assert "+refs/heads/main:refs/remotes/origin/main" in release
     assert 'git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main' in release
-    assert release.index(".verification.verified") < release.index("git fetch")
+    assert release.index('git rev-parse "refs/tags/$GITHUB_REF_NAME"') < release.index("git fetch")
     assert release.index("git merge-base --is-ancestor") < release.index(version_parse)
-    assert release.index(".verification.verified") < release.index(version_parse)
-    assert release.index(".verification.verified") < release.index("uv sync --locked")
-    assert '"repos/${GITHUB_REPOSITORY}/immutable-releases"' in release
-    assert ')" = "true"' in release
-    assert "secrets.RELEASE_SETTINGS_READ_TOKEN" in release
+    assert release.index('git rev-parse "refs/tags/$GITHUB_REF_NAME"') < release.index(
+        version_parse
+    )
+    assert release.index('git rev-parse "refs/tags/$GITHUB_REF_NAME"') < release.index(
+        "uv sync --locked"
+    )
+    assert '"repos/${GITHUB_REPOSITORY}/immutable-releases"' not in release
+    assert "RELEASE_SETTINGS_READ_TOKEN" not in release
+    assert "secrets." not in release
+    assert release.count("GH_TOKEN: ${{ github.token }}") == 4
     assert "sha256sum --check SHA256SUMS" in release
     assert "actions/upload-artifact@" in release
     assert "actions/download-artifact@" in release
@@ -172,6 +177,8 @@ def test_release_is_signed_tag_draft_first_and_immutable_fail_closed() -> None:
         release.index("gh release create")
         < release.index("gh release download")
         < release.index("--draft=false")
+        < release.index("--json isImmutable")
+        < release.index("gh release verify")
     )
 
 
@@ -209,13 +216,10 @@ def test_release_installs_checksummed_github_cli_before_credentialed_commands() 
     assert release.count("sha256sum --check --strict -") == 2
     assert release.count("Confirm the checksummed GitHub CLI is selected") == 2
     assert release.index("Install checksummed GitHub CLI") < release.index(
-        "Require GitHub verification of the signed tag"
+        "Bind the remote annotated tag to the checked-out commit"
     )
     publish_start = release.index("\n  publish:")
     publish = release[publish_start:]
-    assert publish.index("Install checksummed GitHub CLI") < publish.index(
-        "Require repository release immutability"
-    )
     assert publish.index("Confirm the checksummed GitHub CLI is selected") < publish.index(
         "gh release create"
     )
@@ -260,7 +264,7 @@ def test_public_coordination_files_preserve_scope_and_private_reporting() -> Non
     assert "does not establish clinical decision support" in normalized_security
     assert "scientific formula" in contributing.lower()
     assert "private" in contributing.lower()
-    assert "release_settings_read_token" in contributing.lower()
+    assert "release_settings_read_token" not in contributing.lower()
     assert "blank_issues_enabled: false" in issue_config
     assert "/security/advisories/new" in issue_config
     assert "protected health information" in engineering_issue.lower()

@@ -5,6 +5,15 @@ All notable changes use a release-oriented record here. This repository follows
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-31
+
+- Upgrade the development-only pytest requirement and lock from 9.0.3 to 9.1.1 and raise the
+  build-system setuptools floor to 83.0.0.
+- Publish the reviewed maintenance state as an immutable patch release so the hosted Pages commit,
+  package metadata, citation, and release artifacts identify the same source commit.
+- Preserve the generic arithmetic demonstration, initializer contract, scientific-scope prompts,
+  runtime dependencies, browser behavior, accessibility guardrails, and client-side privacy.
+
 ## [0.1.2] - 2026-07-31
 
 - Add a least-privilege, annotated-tag, draft-first release pipeline that verifies all downloaded

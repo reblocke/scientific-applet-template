@@ -23,7 +23,7 @@ def test_worker_loads_and_calculates(page: Page, app_url: str) -> None:
     expect(page.locator("#result-summary")).to_contain_text("2 + 3 = 5")
     expect(page.locator("#result-table tbody tr")).to_have_count(3)
     expect(page.locator("#plot .plot-container")).to_be_visible()
-    expect(page.locator("#runtime-versions")).to_contain_text("0.1.2")
+    expect(page.locator("#runtime-versions")).to_contain_text("0.1.3")
 
 
 def test_validation_error_and_worker_recovery(page: Page, app_url: str) -> None:

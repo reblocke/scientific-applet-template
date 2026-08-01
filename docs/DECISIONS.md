@@ -1,5 +1,14 @@
 # Decisions
 
+## 2026-07-31 — Publish reviewed build maintenance as v0.1.3
+
+The v0.1.3 patch records reviewed pytest and setuptools maintenance and restores exact identity
+among the hosted Pages commit, package metadata, citation, annotated tag, and immutable release
+artifacts. The dependency changes remain development/build-only and do not add a runtime or
+scientific dependency. The generic arithmetic demonstration, disposable-app initializer contract,
+scientific-scope prompts, browser behavior, accessibility guardrails, and client-side privacy are
+unchanged.
+
 ## 2026-07-29 — Functional Python core and browser worker
 
 Python is the calculation source of truth. The static UI sends strict JSON to a restartable

@@ -2,7 +2,7 @@
 
 ## Status
 
-Template status: active engineering scaffold, version 0.1.2.
+Template status: active engineering scaffold, version 0.1.3.
 
 AUTHOR ACTION REQUIRED after initialization: choose and state one maintenance status such as
 experimental, active, maintenance-only, archived, or superseded.

@@ -9,6 +9,26 @@ two-number arithmetic demonstration exists only to prove the complete Python-to-
 path. Replace that demonstration and complete the author-action prompts before making a scientific
 claim.
 
+## Why this template exists
+
+Focused scientific applets repeatedly need the same engineering foundations: a typed Python
+contract, deterministic Pyodide staging, a responsive and accessible browser shell, explicit local
+exports, client-side privacy, and reproducible tests and releases. This repository supplies those
+foundations once so a new app can spend its review effort on its own scientific question and
+formula authority.
+
+## Intended use and audience
+
+This template is for maintainers and scientific-software developers creating a narrowly scoped,
+static applet. It is a creation-time scaffold, not an application for researchers to use as-is and
+not a shared runtime framework. Initializing it creates independently owned source code that must
+be given a specific audience, intended use, scientific scope, validation basis, citation record,
+and maintenance policy before publication.
+
+The template provides engineering behavior only. It does not supply, endorse, or validate a
+scientific formula, dataset, clinical workflow, treatment recommendation, or regulatory use. The
+demonstration output must never be presented as a scientific result.
+
 ## Create an app
 
 Use GitHub’s “Use this template” control, clone the new repository, then run the guarded
@@ -160,5 +180,21 @@ Before calling an initialized app complete:
 
 ## License and citation
 
-Code is MIT licensed. Copyright (c) 2026 Brian Locke. `CITATION.cff` is valid template metadata,
-but its author-action message must be resolved for the initialized scientific app.
+Code is MIT licensed. Copyright (c) 2026 Brian Locke.
+
+For reuse of this uninitialized engineering scaffold, cite the exact template release or commit;
+[`CITATION.cff`](CITATION.cff) contains the template's software metadata. It does not constitute a
+methodology citation or scientific endorsement.
+
+After initialization, the downstream maintainer must:
+
+1. replace the template title, authors, version, repository URL, release date, and citation message
+   with authoritative metadata for the new app;
+2. cite the exact app release or commit used;
+3. identify and cite the primary source, protocol, specification, or exact released core governing
+   every scientific formula; and
+4. distinguish those methodology citations from the app's software citation and validation
+   evidence.
+
+`CITATION.cff` is valid for the template itself; an initialized app must resolve the
+`AUTHOR ACTION REQUIRED` message before being presented as citable scientific software.

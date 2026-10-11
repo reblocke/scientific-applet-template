@@ -27,6 +27,39 @@ with its reviewed version in a comment. For any external scientific core:
 4. run strict JSON, frozen scientific fixtures, staging, Chromium, and WebKit validation;
 5. record the adopted core version in docs, UI, and release notes.
 
+## 2026-10-10 maintenance consolidation
+
+Protected `main` is the leading development branch. The security update
+([#18](https://github.com/reblocke/scientific-applet-template/pull/18)), Action updates
+([#17](https://github.com/reblocke/scientific-applet-template/pull/17)), and development locks
+([#16](https://github.com/reblocke/scientific-applet-template/pull/16)) were reviewed and merged
+sequentially, retaining their branch and PR histories. Earlier feature branches contain work
+already incorporated into `main`; their refs remain available.
+
+The adopted lock contains urllib3 2.8.0, the patched version for
+[GHSA-vxq7-64xx-v4gw](https://github.com/urllib3/urllib3/security/advisories/GHSA-vxq7-64xx-v4gw).
+GitHub marked Dependabot alert #2 fixed after #18 merged. Distribution metadata was checked
+against PyPI, and the Action commit pins were checked against the official release tags.
+
+Fresh engineering checks passed on each reviewed head:
+
+| PR | Reviewed head | CI | Disposable-app self-test |
+| --- | --- | --- | --- |
+| #18 | `8f276e691797c8253b353ffdf829aced049e4eae` | [run, attempt 2](https://github.com/reblocke/scientific-applet-template/actions/runs/37974993951/attempts/2) | [run, attempt 2](https://github.com/reblocke/scientific-applet-template/actions/runs/37974994149/attempts/2) |
+| #17 | `b2c1a7b58cd87651a020dab86d570ae7c29b6064` | [run](https://github.com/reblocke/scientific-applet-template/actions/runs/38115893208) | [run](https://github.com/reblocke/scientific-applet-template/actions/runs/38115893226) |
+| #16 | `55ca57954c6742fb1566198ca39b5627851885d7` | [run](https://github.com/reblocke/scientific-applet-template/actions/runs/38116009517) | [run](https://github.com/reblocke/scientific-applet-template/actions/runs/38116009440) |
+
+Local reproduction on each head: `uv sync --locked`, `uv run playwright install chromium webkit`,
+`make verify`, `make template-self-test`, and `git diff --check`. These passed formatting, lint,
+38 non-browser tests, five Chromium tests, WebKit smoke, and a disposable initialized app's
+29 non-browser tests plus Chromium smoke. Staging checks cover manifest hashes, repeatability,
+and stale-file removal; browser checks include exports, keyboard access, mobile containment,
+worker recovery, and privacy using synthetic inputs.
+
+This is unreleased maintenance work. The project version remains 0.1.3 and the published v0.1.3
+tag and assets remain unchanged. The template still implements only its replaceable arithmetic
+demonstration; these checks establish no scientific or clinical validity.
+
 ## Release
 
 Use a reviewed pull request. After the exact merge commit is verified, create an annotated

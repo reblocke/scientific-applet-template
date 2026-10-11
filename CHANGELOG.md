@@ -5,6 +5,13 @@ All notable changes use a release-oriented record here. This repository follows
 
 ## [Unreleased]
 
+- Upgrade locked urllib3 from 2.7.0 to 2.8.0 to address CVE-2026-97689
+  (GHSA-vxq7-64xx-v4gw).
+- Update SHA-pinned setup-uv to v10.0.1 and deploy-pages to v5.0.1, preserving workflow
+  permissions and disabled release caching.
+- Update development locks to Hypothesis 6.165.10, Playwright 1.62.0,
+  pytest-playwright 0.9.0, and Ruff 0.16.3; record the maintenance verification evidence.
+
 ## [0.1.3] - 2026-07-31
 
 - Upgrade the development-only pytest requirement and lock from 9.0.3 to 9.1.1 and raise the
